@@ -1,4 +1,5 @@
 fastapi
 uvicorn
 httpx
-pydantic
+mysql-connector-python
+uuid7

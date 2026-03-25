@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chatbot - Qwen2.5</title>
+    <title>AI Chatbot - Chăm sóc sức khỏe</title>
     <style>
         * {
             margin: 0;
@@ -120,7 +120,7 @@
         .chat-container {
             width: 100%;
             max-width: 700px;
-            height: 650px;
+            height: 680px;
             background: white;
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -132,12 +132,12 @@
         .chat-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 24px;
+            padding: 20px 24px 14px;
             text-align: center;
         }
 
         .chat-header h1 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 600;
             margin-bottom: 4px;
         }
@@ -162,6 +162,66 @@
             50% { opacity: 0.5; }
         }
 
+        /* ── Progress bar ── */
+        .progress-wrapper {
+            padding: 10px 24px 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 6px;
+        }
+
+        .progress-bar-track {
+            background: rgba(255,255,255,0.25);
+            border-radius: 6px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background: #4ade80;
+            height: 100%;
+            border-radius: 6px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* ── Mode badge ── */
+        .mode-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 6px;
+            transition: all 0.3s;
+        }
+        .mode-badge.intake {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        .mode-badge.chat {
+            background: #4ade80;
+            color: #14532d;
+        }
+
+        /* ── Success banner ── */
+        .success-banner {
+            display: none;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            animation: slideIn 0.4s ease;
+        }
+
         .chat-messages {
             flex: 1;
             overflow-y: auto;
@@ -180,14 +240,8 @@
         }
 
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .message.user {
@@ -218,7 +272,8 @@
             padding: 14px 18px;
             border-radius: 18px;
             word-wrap: break-word;
-            line-height: 1.5;
+            line-height: 1.6;
+            white-space: pre-wrap;
         }
 
         .message.bot .message-bubble {
@@ -257,7 +312,7 @@
         }
 
         .chat-input-container {
-            padding: 20px 24px;
+            padding: 16px 24px;
             border-top: 1px solid #e5e7eb;
             display: flex;
             gap: 12px;
@@ -323,21 +378,11 @@
         <div class="navbar-container">
             <div class="navbar-logo">🏥 Chăm sóc sức khỏe</div>
             <ul class="navbar-menu">
-                <li class="navbar-item">
-                    <a href="#" class="navbar-link">Trang chủ</a>
-                </li>
-                <li class="navbar-item">
-                    <a href="#" class="navbar-link">Giới thiệu</a>
-                </li>
-                <li class="navbar-item">
-                    <a href="#" class="navbar-link active">Chat với AI</a>
-                </li>
-                <li class="navbar-item">
-                    <a href="#" class="navbar-link">Chat với Bác Sĩ</a>
-                </li>
-                <li class="navbar-item">
-                    <a href="#" class="navbar-link login-btn">Đăng nhập/Đăng ký</a>
-                </li>
+                <li class="navbar-item"><a href="#" class="navbar-link">Trang chủ</a></li>
+                <li class="navbar-item"><a href="#" class="navbar-link">Giới thiệu</a></li>
+                <li class="navbar-item"><a href="#" class="navbar-link active">Chat với AI</a></li>
+                <li class="navbar-item"><a href="#" class="navbar-link">Chat với Bác Sĩ</a></li>
+                <li class="navbar-item"><a href="#" class="navbar-link login-btn">Đăng nhập/Đăng ký</a></li>
             </ul>
         </div>
     </nav>
@@ -345,188 +390,254 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="chat-container">
-        <div class="chat-header">
-            <h1>🤖 AI Chatbot</h1>
-            <p><span class="status-indicator"></span>Powered by Qwen2.5:3b-instruct</p>
-        </div>
-        
-        <div class="chat-messages" id="chatMessages">
-            <div class="message bot">
-                <div class="message-avatar">🤖</div>
-                <div class="message-bubble">
-                    Hello! I'm an AI assistant powered by Qwen2.5. How can I help you today?
+            <div class="chat-header">
+                <h1>🏥 Trợ lý Y tế AI</h1>
+                <p><span class="status-indicator"></span>Powered by Qwen · Phiên khám bệnh trực tuyến</p>
+                <span class="mode-badge intake" id="modeBadge">📋 Thu thập thông tin</span>
+            </div>
+
+            <!-- Progress bar (shown during intake) -->
+            <div class="progress-wrapper" id="progressWrapper">
+                <div class="progress-label">
+                    <span id="progressText">Đang tải...</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill" id="progressFill"></div>
                 </div>
             </div>
-        </div>
-        
-        <div class="chat-input-container">
-            <input 
-                type="text" 
-                class="chat-input" 
-                id="messageInput" 
-                placeholder="Type your message..."
-                autocomplete="off"
-            >
-            <button class="send-button" id="sendButton">Send</button>
+
+            <!-- Success banner -->
+            <div class="success-banner" id="successBanner">
+                ✅ Hồ sơ đã được lưu! Bạn có thể tiếp tục hỏi bất kỳ câu hỏi sức khoẻ nào.
+            </div>
+
+            <div class="chat-messages" id="chatMessages"></div>
+
+            <div class="chat-input-container">
+                <input
+                    type="text"
+                    class="chat-input"
+                    id="messageInput"
+                    placeholder="Nhập câu trả lời của bạn..."
+                    autocomplete="off"
+                >
+                <button class="send-button" id="sendButton">Gửi</button>
+            </div>
         </div>
     </div>
 
     <script>
-        const chatMessages = document.getElementById('chatMessages');
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-        
-        const API_URL = 'http://localhost:8000';
-        let conversationHistory = [];
-        let isTyping = false;
+        const chatMessages   = document.getElementById('chatMessages');
+        const messageInput   = document.getElementById('messageInput');
+        const sendButton     = document.getElementById('sendButton');
+        const progressFill   = document.getElementById('progressFill');
+        const progressText   = document.getElementById('progressText');
+        const progressPct    = document.getElementById('progressPercent');
+        const progressWrapper= document.getElementById('progressWrapper');
+        const successBanner  = document.getElementById('successBanner');
+        const modeBadge      = document.getElementById('modeBadge');
 
+        const API_URL = 'http://localhost:8000';
+
+        // ── State ──────────────────────────────────────────────────────────────
+        let sessionId          = null;
+        let intakeMode         = true;   // true = collecting patient info
+        let conversationHistory= [];
+        let isTyping           = false;
+        let totalSteps         = 12;
+
+        // ── UI Helpers ─────────────────────────────────────────────────────────
         function addMessage(text, isUser) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
-            
+
             const avatarDiv = document.createElement('div');
             avatarDiv.className = 'message-avatar';
             avatarDiv.textContent = isUser ? '👤' : '🤖';
-            
+
             const bubbleDiv = document.createElement('div');
             bubbleDiv.className = 'message-bubble';
             bubbleDiv.textContent = text;
-            
+
             messageDiv.appendChild(avatarDiv);
             messageDiv.appendChild(bubbleDiv);
             chatMessages.appendChild(messageDiv);
-            
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
         function showTypingIndicator() {
             if (isTyping) return;
             isTyping = true;
-            
             const typingDiv = document.createElement('div');
             typingDiv.className = 'message bot';
             typingDiv.id = 'typingIndicator';
-            
             const avatarDiv = document.createElement('div');
             avatarDiv.className = 'message-avatar';
             avatarDiv.textContent = '🤖';
-            
             const bubbleDiv = document.createElement('div');
             bubbleDiv.className = 'message-bubble typing-indicator';
             bubbleDiv.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
-            
             typingDiv.appendChild(avatarDiv);
             typingDiv.appendChild(bubbleDiv);
             chatMessages.appendChild(typingDiv);
-            
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
         function hideTypingIndicator() {
-            const indicator = document.getElementById('typingIndicator');
-            if (indicator) {
-                indicator.remove();
-            }
+            const el = document.getElementById('typingIndicator');
+            if (el) el.remove();
             isTyping = false;
         }
 
         function showError(message) {
-            const existingError = document.querySelector('.error-message');
-            if (existingError) existingError.remove();
-            
+            const existing = document.querySelector('.error-message');
+            if (existing) existing.remove();
             const errorDiv = document.createElement('div');
             errorDiv.className = 'error-message';
             errorDiv.textContent = message;
             chatMessages.parentElement.insertBefore(errorDiv, chatMessages);
-            
-            setTimeout(() => errorDiv.remove(), 5000);
+            setTimeout(() => errorDiv.remove(), 6000);
         }
 
-        async function sendMessage() {
-            const message = messageInput.value.trim();
-            
-            if (message === '' || sendButton.disabled) return;
-            
-            addMessage(message, true);
-            messageInput.value = '';
-            sendButton.disabled = true;
-            sendButton.textContent = 'Sending...';
-            
-            showTypingIndicator();
-            
+        function updateProgress(step, total) {
+            const pct = Math.round((step / total) * 100);
+            progressFill.style.width = pct + '%';
+            progressText.textContent = `Câu ${step} / ${total}`;
+            progressPct.textContent  = pct + '%';
+        }
+
+        function switchToFreeChat() {
+            intakeMode = false;
+
+            // Hide progress bar
+            progressWrapper.style.display = 'none';
+
+            // Update badge
+            modeBadge.textContent = '💬 Trò chuyện tự do';
+            modeBadge.classList.remove('intake');
+            modeBadge.classList.add('chat');
+
+            // Show success banner
+            successBanner.style.display = 'block';
+
+            // Update input placeholder
+            messageInput.placeholder = 'Hỏi bất kỳ câu hỏi sức khỏe nào...';
+        }
+
+        // ── Intake Flow ────────────────────────────────────────────────────────
+        async function startIntake() {
             try {
-                const response = await fetch(`${API_URL}/chat`, {
+                const res = await fetch(`${API_URL}/intake/start`, { method: 'POST' });
+                if (!res.ok) throw new Error('Cannot start intake');
+                const data = await res.json();
+
+                sessionId  = data.session_id;
+                totalSteps = data.total;
+
+                updateProgress(data.step, data.total);
+                addMessage(data.question, false);
+            } catch (e) {
+                showError('⚠️ Không thể kết nối đến server. Hãy đảm bảo backend đang chạy trên cổng 8000.');
+            }
+        }
+
+        async function sendIntakeAnswer(answer) {
+            sendButton.disabled = true;
+            sendButton.textContent = 'Đang gửi...';
+            showTypingIndicator();
+
+            try {
+                const res = await fetch(`${API_URL}/intake/answer`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        message: message,
-                        history: conversationHistory
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId, answer })
                 });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || `HTTP ${res.status}`);
                 }
-                
-                const data = await response.json();
-                
-                conversationHistory.push({
-                    role: 'user',
-                    content: message
-                });
-                conversationHistory.push({
-                    role: 'assistant',
-                    content: data.response
-                });
-                
+
+                const data = await res.json();
                 hideTypingIndicator();
-                addMessage(data.response, false);
-                
-            } catch (error) {
-                console.error('Error:', error);
-                hideTypingIndicator();
-                
-                let errorMsg = 'Sorry, I encountered an error. ';
-                if (error.message.includes('Failed to fetch')) {
-                    errorMsg += 'Please make sure the backend server is running on http://localhost:8000';
+
+                if (data.done) {
+                    addMessage(data.message, false);
+                    switchToFreeChat();
                 } else {
-                    errorMsg += error.message;
+                    updateProgress(data.step, data.total);
+                    addMessage(data.question, false);
                 }
-                
-                showError(errorMsg);
-                addMessage(errorMsg, false);
-                
+            } catch (e) {
+                hideTypingIndicator();
+                showError('Lỗi: ' + e.message);
+                addMessage('Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại.', false);
             } finally {
                 sendButton.disabled = false;
-                sendButton.textContent = 'Send';
+                sendButton.textContent = 'Gửi';
                 messageInput.focus();
             }
         }
 
-        sendButton.addEventListener('click', sendMessage);
-        
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !sendButton.disabled) {
-                sendMessage();
-            }
-        });
+        // ── Free Chat Flow ─────────────────────────────────────────────────────
+        async function sendFreeChat(message) {
+            sendButton.disabled = true;
+            sendButton.textContent = 'Đang gửi...';
+            showTypingIndicator();
 
-        // Check backend connection on load
-        async function checkConnection() {
             try {
-                const response = await fetch(`${API_URL}/health`);
-                if (response.ok) {
-                    console.log('✅ Connected to backend successfully');
+                const res = await fetch(`${API_URL}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, history: conversationHistory })
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || `HTTP ${res.status}`);
                 }
-            } catch (error) {
-                showError('⚠️ Cannot connect to backend. Make sure it\'s running on port 8000');
+
+                const data = await res.json();
+                conversationHistory.push({ role: 'user',      content: message });
+                conversationHistory.push({ role: 'assistant', content: data.response });
+
+                hideTypingIndicator();
+                addMessage(data.response, false);
+            } catch (e) {
+                hideTypingIndicator();
+                showError('Lỗi: ' + e.message);
+                addMessage('Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại.', false);
+            } finally {
+                sendButton.disabled = false;
+                sendButton.textContent = 'Gửi';
+                messageInput.focus();
             }
         }
 
-        checkConnection();
+        // ── Main send dispatcher ───────────────────────────────────────────────
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message || sendButton.disabled) return;
+
+            addMessage(message, true);
+            messageInput.value = '';
+
+            if (intakeMode) {
+                await sendIntakeAnswer(message);
+            } else {
+                await sendFreeChat(message);
+            }
+        }
+
+        // ── Event listeners ────────────────────────────────────────────────────
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !sendButton.disabled) sendMessage();
+        });
+
+        // ── Boot ───────────────────────────────────────────────────────────────
+        startIntake();
         messageInput.focus();
     </script>
 </body>
